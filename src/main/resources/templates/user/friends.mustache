@@ -1,0 +1,21 @@
+{{>layouts/header}}
+<div class="container py-4">
+    <h3>친구 추가/검색</h3>
+    <form method="post" action="/friends/search" class="mb-3 d-flex">
+        <input type="text" name="keyword" class="form-control me-2" placeholder="아이디/닉네임 검색">
+        <button class="btn btn-primary">검색</button>
+    </form>
+    {{#results}}
+        <div class="d-flex align-items-center mb-2">
+            <span class="me-2">{{username}} ({{nickname}})</span>
+            <form method="post" action="/friends/request">
+                <input type="hidden" name="toUserId" value="{{id}}">
+                <button class="btn btn-sm btn-success">친구 요청</button>
+            </form>
+        </div>
+    {{/results}}
+    {{^results}}
+        <div class="text-muted">검색 결과가 없습니다.</div>
+    {{/results}}
+</div>
+{{>layouts/footer}}

@@ -3,6 +3,8 @@ package com.dongyang.hyun.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Setter
@@ -19,6 +21,10 @@ public class Todo {
 
     @Column(nullable = false)
     private boolean completed = false;
+
+    @Column(nullable = false)
+    private LocalDate date; // 날짜별 할 일 관리
+
 
     @ManyToOne
     @JoinColumn(name = "user_id")

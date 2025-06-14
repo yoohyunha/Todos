@@ -4,6 +4,9 @@ import com.dongyang.hyun.entity.User;
 import com.dongyang.hyun.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+
 @Service
 public class UserService {
     @Autowired
@@ -37,4 +40,10 @@ public class UserService {
         if (dto.getNickname() != null) user.setNickname(dto.getNickname());
         return userRepository.save(user);
     }
+
+    public List<User> searchByUsername(String keyword, Long excludeId) {
+        return userRepository.findByUsernameContainingAndIdNot(keyword, excludeId);
+    }
+
+
 }

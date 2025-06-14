@@ -18,12 +18,16 @@
         <a class="navbar-brand fw-bold" href="/">MyTodos</a>
         <div>
             <a href="/todos" class="nav-link d-inline px-2">투두리스트</a>
-            <a href="/signup" class="nav-link d-inline px-2">회원가입</a>
-            <a href="/login" class="nav-link d-inline px-2">로그인</a>
-            <a href="/mypage" class="nav-link d-inline px-2">
-                <i class="bi bi-person-circle"></i> 마이페이지
-            </a>
+            {{#user}}
+                <a href="/mypage" class="nav-link d-inline px-2">
+                    <i class="bi bi-person-circle"></i> 마이페이지
+                </a>
+                <a href="/logout" class="nav-link d-inline px-2">로그아웃</a>
+            {{/user}}
+            {{^user}}
+                <a href="/signup" class="nav-link d-inline px-2">회원가입</a>
+                <a href="/login" class="nav-link d-inline px-2">로그인</a>
+            {{/user}}
         </div>
     </div>
 </nav>
-s

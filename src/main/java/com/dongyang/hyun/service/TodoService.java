@@ -6,6 +6,7 @@ import com.dongyang.hyun.repository.TodoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -44,4 +45,9 @@ public class TodoService {
         todoRepository.deleteById(id);
         return true;
     }
+
+    public List<Todo> findByUserIdAndDate(Long userId, LocalDate date) {
+        return todoRepository.findByUserIdAndDate(userId, date);
+    }
+
 }

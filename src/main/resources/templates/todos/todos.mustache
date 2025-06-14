@@ -2,13 +2,16 @@
 
 <div class="container-fluid px-5 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        
-        <div class="fs-2 fw-bold text-center flex-grow-1">MyTodos</div>
-        <a href="/mypage" class="rounded-circle border p-2 d-flex align-items-center justify-content-center bg-light" style="width:38px;height:38px;">
-            <i class="bi bi-person" style="font-size:1.5rem;"></i>
+        <div class="text-center fw-bold mb-2">
+            <button onclick="location.href='/todos?date={{prevMonth}}'" class="btn btn-sm btn-light">&lt;</button>
+            {{currentYear}}년 {{currentMonth}}월
+            <button onclick="location.href='/todos?date={{nextMonth}}'" class="btn btn-sm btn-light">&gt;</button>
+        </div>
+        <!-- 친구 추가/검색 아이콘 (우측 상단) -->
+        <a href="/friends" class="nav-link d-inline px-2" title="친구 추가/검색">
+            <i class="bi bi-person-plus" style="font-size:1.5rem;"></i>
         </a>
     </div>
-
     <div class="row g-4">
         <!-- 오늘 할 일 -->
         <div class="col-md-5">
@@ -18,10 +21,14 @@
                     <span class="fs-5">{{doneCount}}/{{totalCount}}</span>
                     <button class="btn btn-sm btn-outline-secondary ms-2 rounded-circle" style="width:32px;height:32px;" data-bs-toggle="modal" data-bs-target="#addTodoModal">+</button>
                 </div>
+                <div class="fs-5 fw-bold text-center mb-2">{{selectedDate}}</div>
                 <ul class="list-unstyled mt-3">
                     {{#todos}}
                         <li class="d-flex align-items-center mb-3">
-                            <input class="form-check-input me-3" type="checkbox" {{#completed}}checked{{/completed}} onclick="toggleTodo({{id}})">
+                            <input class="form-check-input me-3" type="checkbox"
+                                   {{#completed}}checked{{/completed}}
+                                   onclick="toggleTodo({{id}}, event)">
+
                             <span class="fs-5 {{#completed}}text-decoration-line-through text-muted{{/completed}}">{{content}}</span>
                         </li>
                     {{/todos}}
@@ -34,7 +41,6 @@
         <!-- 캘린더 -->
         <div class="col-md-4">
             <div class="bg-white rounded-4 p-4 shadow-sm">
-                <div class="text-center fw-bold mb-2">June 2021</div>
                 <table class="table table-borderless text-center mb-0">
                     <thead>
                     <tr class="text-muted">
@@ -42,12 +48,18 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <!-- 캘린더 행은 JS/서버에서 데이터로 동적으로 생성 -->
                     {{#calendarRows}}
                         <tr>
-                            {{#days}}
-                                <td class="{{#today}}bg-primary text-white rounded-circle{{/today}}">{{day}}</td>
-                            {{/days}}
+                            {{#this}}
+                            <td
+                                    class="
+                                    {{#today}}bg-primary text-white rounded-circle{{/today}}
+                                        {{#isSelected}}border border-primary rounded-circle{{/isSelected}}
+                                "
+                                {{#date}}onclick="window.location.href='/todos?date={{date}}'" style="cursor:pointer;"{{/date}}>
+                                {{day}}
+                                </td>
+                            {{/this}}
                         </tr>
                     {{/calendarRows}}
                     </tbody>
@@ -55,17 +67,29 @@
             </div>
         </div>
         <!-- 친구 목록 -->
-        <div class="col-md-3">
-            <div class="bg-white rounded-4 p-4 shadow-sm">
-                <div class="fw-bold mb-3">→ 친구 목록</div>
-                {{#friends}}
-                    <button class="btn btn-outline-secondary w-100 mb-2">{{name}}</button>
-                {{/friends}}
-                {{^friends}}
-                    <span class="text-muted">친구가 없습니다.</span>
-                {{/friends}}
+        <div class="fw-bold mb-3">→ 친구 목록</div>
+        {{#friends}}
+            <button class="btn btn-outline-secondary w-100 mb-2">{{nickname}}</button>
+        {{/friends}}
+        {{^friends}}
+            <span class="text-muted">친구가 없습니다.</span>
+        {{/friends}}
+
+        <!-- 친구 요청 목록 -->
+        {{#pendingRequests}}
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>{{fromUser.nickname}}</span>
+                <form method="post" action="/api/friends/accept">
+                    <input type="hidden" name="requestId" value="{{id}}">
+                    <button class="btn btn-sm btn-success">수락</button>
+                </form>
+                <form method="post" action="/api/friends/reject">
+                    <input type="hidden" name="requestId" value="{{id}}">
+                    <button class="btn btn-sm btn-danger">거절</button>
+                </form>
             </div>
-        </div>
+        {{/pendingRequests}}
+
     </div>
 </div>
 
@@ -79,6 +103,7 @@
             </div>
             <div class="modal-body">
                 <input type="text" class="form-control" name="content" placeholder="할 일을 입력하세요" required>
+                <input type="hidden" name="date" value="{{selectedDate}}">
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-primary">추가</button>
@@ -86,5 +111,16 @@
         </form>
     </div>
 </div>
+
+<script>
+    function toggleTodo(id, event) {
+        fetch('/api/todos/' + id, {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ completed: event.target.checked })
+        }).then(() => location.reload());
+    }
+</script>
+
 
 {{>layouts/footer}}

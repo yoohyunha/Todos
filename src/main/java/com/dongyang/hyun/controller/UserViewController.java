@@ -2,19 +2,25 @@ package com.dongyang.hyun.controller;
 
 import com.dongyang.hyun.dto.UserDto;
 import com.dongyang.hyun.entity.User;
+import com.dongyang.hyun.service.FriendService;
 import com.dongyang.hyun.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Controller
 public class UserViewController {
     private final UserService userService;
+    private final FriendService friendService;
 
-    public UserViewController(UserService userService) {
+    public UserViewController(UserService userService, FriendService friendService) {
         this.userService = userService;
+        this.friendService = friendService;
     }
 
     @GetMapping("/login")
@@ -62,4 +68,39 @@ public class UserViewController {
         model.addAttribute("updateSuccess", true);
         return "user/mypage";
     }
+
+    @GetMapping("/friends")
+    public String friendsPage(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/login";
+        model.addAttribute("user", user);
+        // 검색 결과/친구 목록 등도 필요시 추가
+        return "user/friends";
+    }
+
+    @PostMapping("/friends/search")
+    public String searchFriends(@RequestParam String keyword, Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/login";
+        // UserRepository에 findByUsernameContaining 등으로 검색
+        List<User> results = userService.searchByUsername(keyword, user.getId());
+        model.addAttribute("results", results);
+        return "user/friends";
+    }
+
+    @PostMapping("/friends/request")
+    public String requestFriend(@RequestParam Long toUserId, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/login";
+        friendService.sendRequest(user.getId(), toUserId);
+        return "redirect:/friends";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
+    }
+
+
 }
