@@ -1,0 +1,63 @@
+{{>layouts/header}}
+
+<div class="container-fluid px-5 py-4">
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <h3 class="fw-bold text-center flex-grow-1 mb-0">{{friend.nickname}}님의 투두리스트</h3>
+        <!-- 돌아가기 버튼 -->
+        <a href="/todos" class="btn btn-outline-secondary ms-3">내 투두리스트로 돌아가기</a>
+    </div>
+    <div class="row g-4">
+        <!-- 오늘 할 일 -->
+        <div class="col-md-5">
+            <div class="bg-light rounded-4 p-4 position-relative shadow-sm" style="min-height:340px;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0">오늘 할 일</h5>
+                    <span class="fs-5">{{doneCount}}/{{totalCount}}</span>
+                </div>
+                <div class="fs-5 fw-bold text-center mb-2">{{selectedDate}}</div>
+                <ul class="list-unstyled mt-3">
+                    {{#todos}}
+                        <li class="d-flex align-items-center mb-3">
+                            <input class="form-check-input me-3" type="checkbox" disabled {{#completed}}checked{{/completed}}>
+                            <span class="fs-5 {{#completed}}text-decoration-line-through text-muted{{/completed}}">{{content}}</span>
+                        </li>
+                    {{/todos}}
+                    {{^todos}}
+                        <li class="text-muted">할 일이 없습니다.</li>
+                    {{/todos}}
+                </ul>
+            </div>
+        </div>
+        <!-- 캘린더 -->
+        <div class="col-md-4">
+            <div class="bg-white rounded-4 p-4 shadow-sm">
+                <table class="table table-borderless text-center mb-0">
+                    <thead>
+                    <tr class="text-muted">
+                        <th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#calendarRows}}
+                        <tr>
+                            {{#this}}
+                            <td
+                                    class="
+                                    {{#today}}bg-primary text-white rounded-circle{{/today}}
+                                        {{#isSelected}}border border-primary rounded-circle{{/isSelected}}
+                                "
+                                {{#date}}onclick="window.location.href='/todos/friend?userId={{friend.id}}&date={{date}}'" style="cursor:pointer;"{{/date}}>
+                                {{day}}
+                                </td>
+                            {{/this}}
+                        </tr>
+                    {{/calendarRows}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- 오른쪽 카드(친구 목록 등 필요시 추가) -->
+    </div>
+</div>
+
+{{>layouts/footer}}

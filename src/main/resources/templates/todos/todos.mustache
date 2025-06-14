@@ -28,7 +28,6 @@
                             <input class="form-check-input me-3" type="checkbox"
                                    {{#completed}}checked{{/completed}}
                                    onclick="toggleTodo({{id}}, event)">
-
                             <span class="fs-5 {{#completed}}text-decoration-line-through text-muted{{/completed}}">{{content}}</span>
                         </li>
                     {{/todos}}
@@ -66,30 +65,38 @@
                 </table>
             </div>
         </div>
-        <!-- 친구 목록 -->
-        <div class="fw-bold mb-3">→ 친구 목록</div>
-        {{#friends}}
-            <button class="btn btn-outline-secondary w-100 mb-2">{{nickname}}</button>
-        {{/friends}}
-        {{^friends}}
-            <span class="text-muted">친구가 없습니다.</span>
-        {{/friends}}
+        <div class="col-md-3">
+            <div class="bg-white rounded-4 p-4 shadow-sm">
+                <div class="fw-bold mb-3">→ 친구 목록</div>
+                {{#friends}}
+                    <!-- 친구 이름을 클릭하면 그 친구의 투두리스트로 이동 -->
+                    <form method="get" action="/todos/friend">
+                        <input type="hidden" name="userId" value="{{id}}">
+                        <button class="btn btn-outline-secondary w-100 mb-2" type="submit">{{nickname}}</button>
+                    </form>
+                {{/friends}}
+                {{^friends}}
+                    <span class="text-muted">친구가 없습니다.</span>
+                {{/friends}}
 
-        <!-- 친구 요청 목록 -->
-        {{#pendingRequests}}
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span>{{fromUser.nickname}}</span>
-                <form method="post" action="/api/friends/accept">
-                    <input type="hidden" name="requestId" value="{{id}}">
-                    <button class="btn btn-sm btn-success">수락</button>
-                </form>
-                <form method="post" action="/api/friends/reject">
-                    <input type="hidden" name="requestId" value="{{id}}">
-                    <button class="btn btn-sm btn-danger">거절</button>
-                </form>
+                <!-- 친구 요청 목록은 별도 반복문 -->
+                {{#pendingRequests}}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>{{fromUser.nickname}}</span>
+                        <form method="post" action="/friends/accept">
+                            <input type="hidden" name="requestId" value="{{id}}">
+                            <button class="btn btn-sm btn-success">수락</button>
+                        </form>
+                        <form method="post" action="/friends/reject">
+                            <input type="hidden" name="requestId" value="{{id}}">
+                            <button class="btn btn-sm btn-danger">거절</button>
+                        </form>
+                    </div>
+                {{/pendingRequests}}
             </div>
-        {{/pendingRequests}}
+        </div>
 
+    </div>
     </div>
 </div>
 
@@ -121,6 +128,5 @@
         }).then(() => location.reload());
     }
 </script>
-
 
 {{>layouts/footer}}

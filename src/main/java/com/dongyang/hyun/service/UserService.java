@@ -44,6 +44,8 @@ public class UserService {
     public List<User> searchByUsername(String keyword, Long excludeId) {
         return userRepository.findByUsernameContainingAndIdNot(keyword, excludeId);
     }
-
+    public User findById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
 
 }

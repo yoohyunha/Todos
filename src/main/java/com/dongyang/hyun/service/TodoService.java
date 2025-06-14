@@ -35,7 +35,7 @@ public class TodoService {
     public Todo update(Long id, TodoDto dto) {
         Todo target = todoRepository.findById(id).orElse(null);
         if (target == null) return null;
-        target.setContent(dto.getContent());
+        // completed만 갱신
         target.setCompleted(dto.isCompleted());
         return todoRepository.save(target);
     }
@@ -49,5 +49,13 @@ public class TodoService {
     public List<Todo> findByUserIdAndDate(Long userId, LocalDate date) {
         return todoRepository.findByUserIdAndDate(userId, date);
     }
+
+    public Todo findById(Long id) {
+        return todoRepository.findById(id).orElse(null);
+    }
+    public Todo save(Todo todo) {
+        return todoRepository.save(todo);
+    }
+
 
 }

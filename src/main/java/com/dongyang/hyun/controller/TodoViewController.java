@@ -6,6 +6,7 @@ import com.dongyang.hyun.entity.Todo;
 import com.dongyang.hyun.entity.User;
 import com.dongyang.hyun.service.FriendService;
 import com.dongyang.hyun.service.TodoService;
+import com.dongyang.hyun.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -25,10 +26,12 @@ import java.util.Map;
 public class TodoViewController {
     private final TodoService todoService;
     private final FriendService friendService;
+    private final UserService userService;
 
-    public TodoViewController(TodoService todoService, FriendService friendService) {
+    public TodoViewController(TodoService todoService, FriendService friendService, UserService userService) {
         this.todoService = todoService;
         this.friendService = friendService;
+        this.userService = userService;
     }
 
     @PostMapping("/todos/create")
@@ -36,6 +39,7 @@ public class TodoViewController {
         User user = (User) session.getAttribute("user");
         if (user == null) return "redirect:/login";
         Todo todo = dto.toEntity();
+
         todo.setUser(user);
         todoService.create(todo);
         return "redirect:/todos?date=" + todo.getDate(); // 추가 후 해당 날짜로 이동
@@ -69,9 +73,41 @@ public class TodoViewController {
         // 추가!
         model.addAttribute("friends", friends);
         model.addAttribute("pendingRequests", pendingRequests);
-
+        model.addAttribute("user", user);
         return "todos/todos";
     }
+    @GetMapping("/todos/friend")
+    public String friendTodos(@RequestParam Long userId,
+                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                              Model model, HttpSession session) {
+        User me = (User) session.getAttribute("user");
+        if (me == null) return "redirect:/login";
+        // 본인은 항상 볼 수 있음
+        if (!me.getId().equals(userId)) {
+            // 친구가 아닌 경우 접근 차단
+            List<User> myFriends = friendService.getFriends(me.getId());
+            boolean isFriend = myFriends.stream().anyMatch(u -> u.getId().equals(userId));
+            if (!isFriend) return "redirect:/todos";
+        }
+        User friend = userService.findById(userId);
+        if (friend == null) return "redirect:/todos";
+        if (date == null) date = LocalDate.now();
+        List<Todo> todos = todoService.findByUserIdAndDate(userId, date);
+
+        model.addAttribute("todos", todos);
+        model.addAttribute("doneCount", todos.stream().filter(Todo::isCompleted).count());
+        model.addAttribute("totalCount", todos.size());
+        model.addAttribute("selectedDate", date);
+        model.addAttribute("friend", friend);
+
+        model.addAttribute("currentYear", date.getYear());
+        model.addAttribute("currentMonth", date.getMonthValue());
+        model.addAttribute("prevMonth", date.minusMonths(1).withDayOfMonth(1));
+        model.addAttribute("nextMonth", date.plusMonths(1).withDayOfMonth(1));
+        model.addAttribute("calendarRows", generateCalendarRows(date, date));
+        return "todos/friend-todos";
+    }
+
 
 
     private List<List<Map<String, Object>>> generateCalendarRows(LocalDate baseDate, LocalDate selectedDate) {

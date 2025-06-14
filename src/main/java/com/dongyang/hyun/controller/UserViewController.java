@@ -101,6 +101,22 @@ public class UserViewController {
         session.invalidate();
         return "redirect:/";
     }
+    @PostMapping("/friends/accept")
+    public String acceptFriend(@RequestParam Long requestId, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/login";
+        friendService.acceptRequest(requestId, user.getId());
+        return "redirect:/todos";
+    }
+
+    @PostMapping("/friends/reject")
+    public String rejectFriend(@RequestParam Long requestId, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/login";
+        friendService.rejectRequest(requestId, user.getId());
+        return "redirect:/todos";
+    }
+
 
 
 }
