@@ -33,6 +33,8 @@ public class TodoApiController {
         return ResponseEntity.ok(updated);
     }
 
+
+
     @DeleteMapping("/api/todos/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         return todoService.delete(id) ? ResponseEntity.noContent().build() : ResponseEntity.badRequest().build();
